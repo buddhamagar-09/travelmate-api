@@ -15,17 +15,22 @@ class PackageController extends Controller
         return Package::with(['galleries', 'itineraries', 'includes', 'excludes'])
             ->latest()
             ->get();
+            // it returns all packages with their related galleries, itineraries, includes, and excludes.
     }
 
     // GET /api/packages/{id}
     public function show(Package $package)
     {
         return $package->load(['galleries', 'itineraries', 'includes', 'excludes']);
+        // it returns the package with its related galleries, itineraries, includes, and excludes.
     }
 
     // POST /api/packages
     public function store(Request $request)
     {
+        // it validates the incoming request data for creating a new package. 
+        // The validation rules ensure that all required fields are present and meet specific criteria, such as data type and maximum length. 
+        // If the validation fails, Laravel will automatically return a response with the validation errors.
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|unique:packages,slug',
@@ -72,6 +77,7 @@ class PackageController extends Controller
     // PUT /api/packages/{id}
     public function update(Request $request, Package $package)
     {
+         // Validate the incoming request data for updating an existing package.
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'slug' => 'sometimes|required|string|unique:packages,slug,' . $package->id,
@@ -98,14 +104,14 @@ class PackageController extends Controller
             $validated['featured_image'] = $request->file('featured_image')
                 ->store('packages', 'public');
         }
-
+       
         $package->update($validated);
 
         return response()->json([
             'message' => 'Package updated successfully',
             'package' => $package,
             'package_id' => $package->id
-        ],201);
+        ], 200);
     }
 
     // DELETE /api/packages/{id}
