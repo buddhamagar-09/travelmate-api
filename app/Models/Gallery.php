@@ -9,8 +9,7 @@ class Gallery extends Model
     protected $fillable = [
         'package_id',
         'image_path',
-        'caption',
-        'sort_order',
+       
     ];
 
     // Each gallery image belongs to one package

@@ -17,6 +17,7 @@ class Package extends Model
         'max_altitude',
         'group_size',
         'best_season',
+        'location',
         'featured_image',
         'is_featured',
     ];
