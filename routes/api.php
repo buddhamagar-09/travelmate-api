@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\ItineraryController;
+use App\Http\Controllers\Api\GalleryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/packages', [PackageController::class, 'index']);
 Route::get('/packages/{package}', [PackageController::class, 'show']);
 Route::get('/itinerary/{package}', [ItineraryController::class, 'show']);
+Route::get('/gallery/{package}', [GalleryController::class, 'show']);
 
 
 /*
@@ -51,4 +53,10 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/itinerary/{package}', [ItineraryController::class, 'store']);
     Route::put('/itinerary/{package}', [ItineraryController::class, 'update']);
     Route::delete('/itinerary/{package}', [ItineraryController::class, 'destroy']);
+
+    //Gallery Management
+    Route::post('/gallery/{package}', [GalleryController::class, 'add']);
+    Route::put('/gallery/{package}', [GalleryController::class, 'update']);
+    Route::delete('/gallery/{package}', [GalleryController::class, 'delete']);
+    
 });
