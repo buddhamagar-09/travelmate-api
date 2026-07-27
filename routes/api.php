@@ -5,6 +5,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\ItineraryController;
 use App\Http\Controllers\Api\GalleryController;
+use App\Http\Controllers\Api\IncludesController;
+use App\Http\Controllers\Api\ExcludesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +22,10 @@ Route::get('/packages', [PackageController::class, 'index']);
 Route::get('/packages/{package}', [PackageController::class, 'show']);
 Route::get('/itinerary/{package}', [ItineraryController::class, 'show']);
 Route::get('/gallery/{package}', [GalleryController::class, 'show']);
+Route::get('/includes/{package}', [IncludesController::class, 'show']);
+Route::get('/excludes/{package}', [ExcludesController::class, 'show']);
+
+
 
 
 /*
@@ -58,5 +64,16 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/gallery/{package}', [GalleryController::class, 'add']);
     Route::put('/gallery/{package}', [GalleryController::class, 'update']);
     Route::delete('/gallery/{package}', [GalleryController::class, 'delete']);
-    
+
+    //Includes Management
+    Route::post('/includes/{package}', [IncludesController::class, 'store']);
+    Route::put('/includes/{package}', [IncludesController::class, 'update']);
+    Route::delete('/includes/{package}', [IncludesController::class, 'destroy']);
+
+    //Excludes Management
+    Route::post('/excludes/{package}', [ExcludesController::class, 'store']);
+    Route::put('/excludes/{package}', [ExcludesController::class, 'update']);
+    Route::delete('/excludes/{package}', [ExcludesController::class, 'destroy']);
+   
+
 });
