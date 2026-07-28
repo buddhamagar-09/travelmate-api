@@ -27,9 +27,12 @@ class ExcludesController extends Controller
        'excludes.*' => 'required|string|max:255',
         ]);
 
-        foreach($validate['excludes'] as $item){
+        // Delete existing excludes
+        $package->excludes()->delete();
+
+        foreach($validate['excludes'] as $NewExclude){
             $package->excludes()->create([
-                'item' => $item,
+                'item' => $NewExclude,
             ]);
         }
 
@@ -41,9 +44,13 @@ class ExcludesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(package $package)
     {
-        //
+        return response()->json([
+            'excludes' => $package->excludes()
+            ->orderBy('id')
+            ->get()
+        ]);
     }
 
     /**
@@ -51,7 +58,23 @@ class ExcludesController extends Controller
      */
     public function update(Request $request,package $package)
     {
-        //
+        $validate = $request->validate([
+       'excludes' => 'required|array',
+       'excludes.*' => 'required|string|max:255',
+        ]);
+
+        // Delete existing excludes
+        $package->excludes()->delete();
+
+        foreach($validate['excludes'] as $NewExclude){
+            $package->excludes()->create([
+                'item' => $NewExclude,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Excludes updated successfully.'
+        ], 200);
     }
 
     /**
@@ -59,6 +82,9 @@ class ExcludesController extends Controller
      */
     public function destroy(package $package)
     {
-        //
+        $package->excludes()->delete();
+        return response()->json([
+            'message' => 'Excludes deleted successfully.'
+        ], 200);
     }
 }
