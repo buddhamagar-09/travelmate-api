@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ItineraryController;
 use App\Http\Controllers\Api\GalleryController;
 use App\Http\Controllers\Api\IncludesController;
 use App\Http\Controllers\Api\ExcludesController;
+use App\Http\Controllers\Api\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +17,7 @@ use App\Http\Controllers\Api\ExcludesController;
 
 // Authentication
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [UserController::class, 'register']);
 
 // Public package routes
 Route::get('/packages', [PackageController::class, 'index']);
@@ -24,6 +26,7 @@ Route::get('/itinerary/{package}', [ItineraryController::class, 'show']);
 Route::get('/gallery/{package}', [GalleryController::class, 'show']);
 Route::get('/includes/{package}', [IncludesController::class, 'show']);
 Route::get('/excludes/{package}', [ExcludesController::class, 'show']);
+Route::get('/view-users', [UserController::class, 'index']);
 
 
 
@@ -54,6 +57,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/packages', [PackageController::class, 'store']);
     Route::put('/packages/{package}', [PackageController::class, 'update']);
     Route::delete('/packages/{package}', [PackageController::class, 'destroy']);
+    Route::put('/packages/{package}/toggle-status', [PackageController::class, 'toggleStatus']);
 
     //itinerary management
     Route::post('/itinerary/{package}', [ItineraryController::class, 'store']);
@@ -74,6 +78,9 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/excludes/{package}', [ExcludesController::class, 'store']);
     Route::put('/excludes/{package}', [ExcludesController::class, 'update']);
     Route::delete('/excludes/{package}', [ExcludesController::class, 'destroy']);
+
+    //user management
+    Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus']);
    
 
 });
