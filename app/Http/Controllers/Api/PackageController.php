@@ -15,7 +15,7 @@ class PackageController extends Controller
         return Package::with(['galleries', 'itineraries', 'includes', 'excludes'])
             ->latest()
             ->get();
-            // it returns all packages with their related galleries, itineraries, includes, and excludes.
+        // it returns all packages with their related galleries, itineraries, includes, and excludes.
     }
 
     // GET /api/packages/{id}
@@ -77,7 +77,7 @@ class PackageController extends Controller
     // PUT /api/packages/{id}
     public function update(Request $request, Package $package)
     {
-         // Validate the incoming request data for updating an existing package.
+        // Validate the incoming request data for updating an existing package.
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'slug' => 'sometimes|required|string|unique:packages,slug,' . $package->id,
@@ -104,7 +104,7 @@ class PackageController extends Controller
             $validated['featured_image'] = $request->file('featured_image')
                 ->store('packages', 'public');
         }
-       
+
         $package->update($validated);
 
         return response()->json([
@@ -126,6 +126,18 @@ class PackageController extends Controller
 
         return response()->json([
             'message' => 'Package deleted successfully'
+        ]);
+    }
+
+    public function toggleStatus(Package $package)
+    {
+        $status = $package->status === 'active' ? 'inactive' : 'active';
+        $package->status = $status;
+        $package->save();
+
+        return response()->json([
+            'message' => 'Package status updated successfully',
+            'package' => $package
         ]);
     }
 }
