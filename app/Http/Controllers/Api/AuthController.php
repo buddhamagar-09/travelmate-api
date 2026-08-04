@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class AuthController extends Controller
 {
     // LOGIN
-    public function login(Request $request)
+    public function login(Request $request, user $user)
     {
         $credentials = $request->validate([
             'email' => 'required|email',
@@ -23,6 +24,15 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
+
+        if ($user->status === 'inactive') {
+            // Auth::logout(); // Optional but recommended
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account has been blocked.',
+            ], 403);
+        }
 
         // Delete previous tokens
         $user->tokens()->delete();
@@ -52,3 +62,8 @@ class AuthController extends Controller
         return response()->json($request->user());
     }
 }
+//AuthController handles user authentication for the API.
+// It provides methods for logging in, logging out,
+// and retrieving the currently authenticated user's information. The login method validates the user's credentials,
+// generates a new API token, and returns it along with the user data. The logout method revokes the current access token, 
+//effectively logging the user out. The user method returns the authenticated user's details.
