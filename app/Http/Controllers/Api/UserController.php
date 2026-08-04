@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\support\Facades\Hash;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -14,10 +14,12 @@ class UserController extends Controller
      */
     public function index()
     {
+
+        $users = User::where('usertype', 'user')->latest()->get();
         return response()->json([
             'success' => true,
             'message' => 'List of users',
-            'users' => User::all(),
+            'users' => $users,
         ]);
     }
 
@@ -38,32 +40,19 @@ class UserController extends Controller
             'usertype' => 'user', // Default user type
         ]);
 
-        return response() -> json([
+        return response()->json([
             'success' => true,
             'message' => 'User registered successfully',
             'user' => $user,
-        ],201);
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(user $user)
     {
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not found',
-            ], 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'User found',
-            'user' => $user,
-        ]);
+     //   
     }
 
     /**
@@ -80,5 +69,21 @@ class UserController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+    public function toggleStatus(user $user)
+    {
+        if ($user->status === 'active') {
+            $user->status = 'inactive';
+        } else {
+            $user->status = 'active';
+        }
+
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User status updated successfully',
+            'user' => $user,
+        ]);
     }
 }
