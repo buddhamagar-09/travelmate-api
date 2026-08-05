@@ -44,6 +44,11 @@ class Package extends Model
     {
         return $this->hasMany(Excludes::class);
     }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
 }
 
 // it is used to define the Package model in a Laravel application. The model represents the "packages" table in the database 
