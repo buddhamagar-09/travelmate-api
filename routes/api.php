@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\GalleryController;
 use App\Http\Controllers\Api\IncludesController;
 use App\Http\Controllers\Api\ExcludesController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\BookingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,11 +23,8 @@ Route::post('/register', [UserController::class, 'register']);
 // Public package routes
 Route::get('/packages', [PackageController::class, 'index']);
 Route::get('/packages/{package}', [PackageController::class, 'show']);
-Route::get('/itinerary/{package}', [ItineraryController::class, 'show']);
-Route::get('/gallery/{package}', [GalleryController::class, 'show']);
-Route::get('/includes/{package}', [IncludesController::class, 'show']);
-Route::get('/excludes/{package}', [ExcludesController::class, 'show']);
-Route::get('/view-users', [UserController::class, 'index']);
+
+
 
 
 
@@ -42,6 +40,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // Logged-in user
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+
+    // Booking
+    Route::post('/bookings', [BookingController::class, 'store']);
+    Route::get('/bookings', [BookingController::class, 'index']);
+    Route::get('/bookings/{booking}', [BookingController::class, 'show']);
+
+    Route::get('/view-users/{id}', [UserController::class, 'show']);
+    Route::get('/itinerary/{package}', [ItineraryController::class, 'show']);
+    Route::get('/gallery/{package}', [GalleryController::class, 'show']);
+    Route::get('/includes/{package}', [IncludesController::class, 'show']);
+    Route::get('/excludes/{package}', [ExcludesController::class, 'show']);
+    Route::get('/view-users', [UserController::class, 'index']);
 });
 
 
@@ -81,6 +91,5 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 
     //user management
     Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus']);
-   
 
 });
