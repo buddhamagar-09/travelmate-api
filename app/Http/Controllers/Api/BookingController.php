@@ -14,7 +14,14 @@ class BookingController extends Controller
      */
     public function index()
     {
-        //
+        $bookings = Booking::with(['user', 'package'])
+            ->latest()
+            ->get();
+        
+        return response()->json([
+            'success' => true,
+            'bookings' => $bookings,
+        ]);
     }
 
     /**
@@ -22,7 +29,7 @@ class BookingController extends Controller
      */
     public function store(Request $request)
     {
-       
+
         $validated = $request->validate([
             'package_id' => 'required|exists:packages,id',
             'phone_number' => 'required|string|max:20',
@@ -61,10 +68,28 @@ class BookingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        //
+public function updateStatus(Request $request, Booking $booking)
+{
+    $validated = $request->validate([
+        'status' => 'required|in:confirmed,cancelled',
+    ]);
+
+    // Don't allow changing a booking once it's finalized
+    if ($booking->status !== 'pending') {
+        return response()->json([
+            'message' => 'This booking has already been processed.'
+        ], 400);
     }
+
+    $booking->status = $validated['status'];
+    $booking->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Booking status updated successfully.',
+        'booking' => $booking,
+    ]);
+}
 
     /**
      * Remove the specified resource from storage.
@@ -74,3 +99,5 @@ class BookingController extends Controller
         //
     }
 }
+
+
