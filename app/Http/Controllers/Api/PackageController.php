@@ -12,7 +12,7 @@ class PackageController extends Controller
     // GET /api/packages
     public function index()
     {
-        return Package::with(['galleries', 'itineraries', 'includes', 'excludes'])
+        return Package::with(['galleries', 'itineraries', 'includes', 'excludes'])->where('status', 'active')
             ->latest()
             ->get();
         // it returns all packages with their related galleries, itineraries, includes, and excludes.
@@ -21,6 +21,11 @@ class PackageController extends Controller
     // GET /api/packages/{id}
     public function show(Package $package)
     {
+        // Ensure the package is active
+        if ($package->status !== 'active') {
+            return response()->json(['message' => 'Package not found'], 404);
+        }
+
         return $package->load(['galleries', 'itineraries', 'includes', 'excludes']);
         // it returns the package with its related galleries, itineraries, includes, and excludes.
     }
@@ -139,5 +144,12 @@ class PackageController extends Controller
             'message' => 'Package status updated successfully',
             'package' => $package
         ]);
+    }
+
+    public function adminIndex()
+    {
+          return Package::with(['galleries', 'itineraries', 'includes', 'excludes'])
+            ->latest()
+            ->get();
     }
 }
