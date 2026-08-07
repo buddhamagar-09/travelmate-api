@@ -50,10 +50,21 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(user $user)
-    {
-     //   
-    }
+    // public function show(String $id)
+    // {
+    //     $user = User::find($id);
+    //     if(!$user) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'User not found',
+    //         ], 404);
+    //     }
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'User details',
+    //         'user' => $user,
+    //     ]);
+    // }
 
     /**
      * Update the specified resource in storage.
@@ -86,4 +97,6 @@ class UserController extends Controller
             'user' => $user,
         ]);
     }
+
+   
 }
