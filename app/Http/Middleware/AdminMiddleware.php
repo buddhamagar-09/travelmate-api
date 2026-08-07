@@ -18,7 +18,7 @@ class AdminMiddleware
 
         if ($request->user()->usertype !== 'admin') {
             return response()->json([
-                'message' => 'Unauthorized'
+                'message' => 'Unauthorized xas ta'
             ], 403);
         }
 
