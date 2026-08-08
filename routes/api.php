@@ -65,6 +65,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 
     // Package Management
     Route::post('/packages', [PackageController::class, 'store']);
+    Route::get('/adminpackages', [PackageController::class, 'adminIndex']);
     Route::put('/packages/{package}', [PackageController::class, 'update']);
     Route::delete('/packages/{package}', [PackageController::class, 'destroy']);
     Route::put('/packages/{package}/toggle-status', [PackageController::class, 'toggleStatus']);
@@ -91,5 +92,6 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 
     //user management
     Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus']);
+    Route::patch('/bookings/{booking}/update-status', [BookingController::class, 'updateStatus']);
 
 });
