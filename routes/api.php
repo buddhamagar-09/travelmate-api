@@ -45,6 +45,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/bookings', [BookingController::class, 'index']);
     Route::get('/bookings/{booking}', [BookingController::class, 'show']);
+    Route::get('/my-bookings', [BookingController::class, 'userBookings']);
+    Route::get('/booking-details/{id}', [BookingController::class, 'userBookingDetails']);
 
     Route::get('/view-users/{id}', [UserController::class, 'show']);
     Route::get('/itinerary/{package}', [ItineraryController::class, 'show']);
