@@ -98,6 +98,34 @@ public function updateStatus(Request $request, Booking $booking)
     {
         //
     }
+
+
+    public function userBookings(Request $request)
+    {
+        $bookings = Booking::with(['package'])
+            ->where('user_id', $request->user()->id)
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'bookings' => $bookings,
+        ]);
+
+    }
+
+    public function userBookingDetails(Request $request,$id)
+    {
+        $BookingDetails = Booking::with('user','package')
+        ->where('user_id', $request->user()->id)
+        ->where('id', $id)
+        ->firstorFail();
+
+        return response()->json([
+            'success' => true,
+            'bookingDetails' => $BookingDetails,
+        ]);
+    }
 }
 
 
