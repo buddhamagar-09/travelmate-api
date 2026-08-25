@@ -16,6 +16,7 @@ class Booking extends Model
         'special_request',
         'total_price',
         'status',
+        'payment_status',
     ];
 
     public function user()
