@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bookings/{booking}', [BookingController::class, 'show']);
     Route::get('/my-bookings', [BookingController::class, 'userBookings']);
     Route::get('/booking-details/{id}', [BookingController::class, 'userBookingDetails']);
+    Route::patch('/bookings/{booking}/cancel-booking', [BookingController::class, 'cancelBooking']);
 
     Route::get('/view-users/{id}', [UserController::class, 'show']);
     Route::get('/itinerary/{package}', [ItineraryController::class, 'show']);
@@ -95,5 +96,6 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     //user management
     Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus']);
     Route::patch('/bookings/{booking}/update-status', [BookingController::class, 'updateStatus']);
+
 
 });
