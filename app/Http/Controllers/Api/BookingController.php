@@ -126,6 +126,41 @@ public function updateStatus(Request $request, Booking $booking)
             'bookingDetails' => $BookingDetails,
         ]);
     }
+
+    /**
+     * Cancel the specified booking.
+     */
+    public function cancelBooking(Request $request,Booking $booking)
+    {
+
+        // Check if the booking belongs to the authenticated user
+        if ($booking->user_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'You are not authorized to cancel this booking.'
+            ], 403);
+        }
+
+        // Check if the booking is already cancelled or confirmed
+        if ($booking->status === 'cancelled') {
+            return response()->json([
+                'message' => 'This booking has already been cancelled.'
+            ], 400);
+        } elseif ($booking->status === 'confirmed') {
+            return response()->json([
+                'message' => 'This booking has already been confirmed and cannot be cancelled.'
+            ], 400);
+        }
+
+        // Update the booking status to cancelled
+        $booking->status = 'cancelled';
+        $booking->save();
+
+        return response()->json([
+            'message' => 'Booking cancelled successfully.',
+            'booking' => $booking,
+        ]);
+        
+    }
 }
 
 
