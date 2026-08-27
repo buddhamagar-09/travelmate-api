@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\IncludesController;
 use App\Http\Controllers\Api\ExcludesController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\ReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +56,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/includes/{package}', [IncludesController::class, 'show']);
     Route::get('/excludes/{package}', [ExcludesController::class, 'show']);
     Route::get('/view-users', [UserController::class, 'index']);
+
+    //Review endpoints
+    Route::post('/reviews', [ReviewController::class, 'storeReview']);
+    Route::get('/reviews', [ReviewController::class, 'index']);
 });
 
 
