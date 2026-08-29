@@ -25,6 +25,8 @@ Route::post('/register', [UserController::class, 'register']);
 Route::get('/packages', [PackageController::class, 'index']);
 Route::get('/packages/{package}', [PackageController::class, 'show']);
 
+Route::get('/show-reviews', [ReviewController::class, 'showReviews']);
+
 
 
 
@@ -59,7 +61,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Review endpoints
     Route::post('/reviews', [ReviewController::class, 'storeReview']);
-    Route::get('/reviews', [ReviewController::class, 'index']);
+    Route::get('/view-reviews', [ReviewController::class, 'index']);
+    
+   
 });
 
 
@@ -101,6 +105,9 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     //user management
     Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus']);
     Route::patch('/bookings/{booking}/update-status', [BookingController::class, 'updateStatus']);
+
+    //Review Management
+    Route::patch('/reviews/{review}/toggle-status',[ReviewController::class, 'togglestatus']);
 
 
 });
