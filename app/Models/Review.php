@@ -13,6 +13,7 @@ class Review extends Model
     'package_id',
     'rating',
     'comment',
+    'status',
     ];
 
 public function user()
