@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\ExcludesController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\EsewaController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -28,12 +30,16 @@ Route::get('/packages/{package}', [PackageController::class, 'show']);
 Route::get('/show-reviews', [ReviewController::class, 'showReviews']);
 
 
+//esewa payment routes
+Route::get('/esewa/success', [EsewaController::class, 'success']);
+Route::get('/esewa/failure', [EsewaController::class, 'failure']);
+
+
 
 
 
 
 /*
-|--------------------------------------------------------------------------
 | Authenticated Routes
 |--------------------------------------------------------------------------
 */
@@ -62,8 +68,9 @@ Route::middleware('auth:sanctum')->group(function () {
     //Review endpoints
     Route::post('/reviews', [ReviewController::class, 'storeReview']);
     Route::get('/view-reviews', [ReviewController::class, 'index']);
-    
-   
+
+    //eswa initiate payment
+    Route::post('/esewa/initiate', [EsewaController::class, 'initiatePayment']);
 });
 
 
