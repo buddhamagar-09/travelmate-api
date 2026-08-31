@@ -17,6 +17,7 @@ class Booking extends Model
         'total_price',
         'status',
         'payment_status',
+        'transaction_uuid',
     ];
 
     public function user()
