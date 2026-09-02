@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class EsewaController extends Controller
 {
@@ -51,6 +52,7 @@ class EsewaController extends Controller
         $productCode = config('esewaconfig.product_code');
         $secretKey = config('esewaconfig.secret_key');
 
+
         // Generate signature
         $signedString =
             "total_amount={$totalAmount}," .
@@ -65,6 +67,7 @@ class EsewaController extends Controller
                 true
             )
         );
+
 
         return response()->json([
             'payment_url' => config('esewaconfig.payment_url'),
@@ -82,8 +85,7 @@ class EsewaController extends Controller
                 'product_delivery_charge' => 0,
 
                 'success_url' => url('/api/esewa/success'),
-                'failure_url' => url('/api/esewa/failure'),
-
+                'failure_url' => url('/api/esewa/failure') . '?booking_id=' . $booking->id,
                 'signed_field_names' =>
                     'total_amount,transaction_uuid,product_code',
 
@@ -98,43 +100,51 @@ class EsewaController extends Controller
     public function success(Request $request)
     {
         try {
-            // eSewa sends the payment response in the "data" parameter
-            $encodedData = $request->query('data');
 
-            if (!$encodedData) {
-                return response()->json([
-                    'message' => 'Payment response data is missing.'
-                ], 400);
-            }
+            // 1. Decode eSewa response
+            $data = json_decode(
+                base64_decode($request->query('data')),
+                true
+            );
 
-            // Decode Base64 response
-            $decodedData = base64_decode($encodedData);
-
-            if (!$decodedData) {
+            if (!$data) {
                 return response()->json([
                     'message' => 'Invalid payment response.'
                 ], 400);
             }
 
-            // Convert JSON response to array
-            $paymentData = json_decode($decodedData, true);
+            // 2. Get payment information
+            $transactionUuid = $data['transaction_uuid'] ?? null;
+            $signature = $data['signature'] ?? null;
+            $signedFields = $data['signed_field_names'] ?? null;
 
-            if (!$paymentData) {
+            if (!$transactionUuid || !$signature || !$signedFields) {
                 return response()->json([
-                    'message' => 'Unable to decode payment response.'
+                    'message' => 'Incomplete payment response.'
                 ], 400);
             }
 
-            // Get transaction UUID
-            $transactionUuid = $paymentData['transaction_uuid'] ?? null;
+            // 3. Verify signature
+            $signedData = collect(explode(',', $signedFields))
+                ->map(fn($field) => $field . '=' . ($data[$field] ?? ''))
+                ->implode(',');
 
-            if (!$transactionUuid) {
+            $expectedSignature = base64_encode(
+                hash_hmac(
+                    'sha256',
+                    $signedData,
+                    config('esewaconfig.secret_key'),
+                    true
+                )
+            );
+
+            if (!hash_equals($expectedSignature, $signature)) {
                 return response()->json([
-                    'message' => 'Transaction UUID is missing.'
+                    'message' => 'Invalid payment signature.'
                 ], 400);
             }
 
-            // Find the booking
+            // 4. Find booking
             $booking = Booking::where(
                 'transaction_uuid',
                 $transactionUuid
@@ -146,21 +156,14 @@ class EsewaController extends Controller
                 ], 404);
             }
 
-            // Verify the amount returned by eSewa
-            $totalAmount = $paymentData['total_amount'] ?? null;
-
-            if ((float) $totalAmount !== (float) $booking->total_price) {
+            // 5. Check amount
+            if ((float) $data['total_amount'] !== (float) $booking->total_price) {
                 return response()->json([
-                    'message' => 'Payment amount does not match booking amount.'
+                    'message' => 'Payment amount does not match.'
                 ], 400);
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Verify transaction with eSewa
-            |--------------------------------------------------------------------------
-            */
-
+            // 6. Verify transaction with eSewa
             $response = Http::get(
                 config('esewaconfig.status_url'),
                 [
@@ -170,57 +173,43 @@ class EsewaController extends Controller
                 ]
             );
 
-            if (!$response->successful()) {
-                return response()->json([
-                    'message' => 'Unable to verify payment with eSewa.'
-                ], 500);
-            }
-
-            $verificationData = $response->json();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Check eSewa payment status
-            |--------------------------------------------------------------------------
-            */
-
             if (
-                isset($verificationData['status']) &&
-                $verificationData['status'] === 'COMPLETE'
+                $response->successful() &&
+                $response->json('status') === 'COMPLETE'
             ) {
                 $booking->update([
-                    'payment_status' => 'approve',
+                    'payment_status' => 'paid',
                 ]);
 
-                return response()->json([
-                    'message' => 'Payment verified successfully.',
-                    'booking_id' => $booking->id,
-                    'payment_status' => 'approve',
-                ]);
+                return redirect(
+                    'http://localhost:5173/esewa-success/' . $booking->id
+                );
             }
 
             return response()->json([
-                'message' => 'Payment was not completed.',
-                'status' => $verificationData['status'] ?? 'UNKNOWN',
+                'message' => 'Payment was not completed.'
             ], 400);
 
         } catch (\Exception $e) {
 
             return response()->json([
-                'message' => 'Payment verification failed.',
-                'error' => $e->getMessage(),
+                'message' => 'Payment verification failed.'
             ], 500);
         }
     }
-
     /**
      * eSewa redirects here if payment fails
      */
     public function failure(Request $request)
     {
-        return response()->json([
-            'message' => 'Payment failed',
-            'data' => $request->all(),
-        ]);
+        $bookingId = $request->query('booking_id');
+
+        if (!$bookingId) {
+            return redirect('http://localhost:5173/my-bookings');
+        }
+
+        return redirect(
+            'http://localhost:5173/esewa-failure/' . $bookingId
+        );
     }
 }
