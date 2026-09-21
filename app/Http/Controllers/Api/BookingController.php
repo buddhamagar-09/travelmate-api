@@ -114,7 +114,7 @@ public function updateStatus(Request $request, Booking $booking)
 
     }
 
-    public function userBookingDetails(Request $request,$id)
+    public function userBookingDetails(Request $request,string $id)
     {
         $BookingDetails = Booking::with('user','package')
         ->where('user_id', $request->user()->id)
