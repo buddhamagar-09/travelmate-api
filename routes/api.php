@@ -35,6 +35,10 @@ Route::get('/esewa/success', [EsewaController::class, 'success']);
 Route::get('/esewa/failure', [EsewaController::class, 'failure']);
 
 
+//search Routes
+Route::get('/search-packages', [PackageController::class, 'search']);
+
+
 
 
 
