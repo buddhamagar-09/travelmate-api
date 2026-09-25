@@ -152,4 +152,43 @@ class PackageController extends Controller
             ->latest()
             ->get();
     }
+
+
+  public function search(Request $request)
+{
+    $query = trim($request->input('query'));
+
+    if (!$query) {
+        return response()->json([
+            'message' => 'Query parameter is required'
+        ], 400);
+    }
+
+    $package = Package::select(
+            'id',
+            'title',
+            'slug',
+            'location',
+            'duration',
+            'price',
+            'group_size',
+            'max_altitude',
+            'difficulty',
+            'best_season',
+            'short_description',
+            'long_description',
+            'featured_image'
+        )
+        ->where('status', 'active')
+        ->where(function ($q) use ($query) {
+            $q->where('title', 'LIKE', "%{$query}%")
+              ->orWhere('slug', 'LIKE', "%{$query}%")
+              ->orWhere('location', 'LIKE', "%{$query}%")
+              ->orWhere('short_description', 'LIKE', "%{$query}%")
+              ->orWhere('long_description', 'LIKE', "%{$query}%");
+        })
+        ->get();
+
+    return response()->json($package);
+}
 }
