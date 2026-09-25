@@ -153,6 +153,7 @@ public function updateStatus(Request $request, Booking $booking)
 
         // Update the booking status to cancelled
         $booking->status = 'cancelled';
+        $booking->payment_status = 'failed'; // Optionally update payment status
         $booking->save();
 
         return response()->json([
