@@ -1,17 +1,16 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\PackageController;
-use App\Http\Controllers\Api\ItineraryController;
+use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\EsewaController;
+use App\Http\Controllers\Api\ExcludesController;
 use App\Http\Controllers\Api\GalleryController;
 use App\Http\Controllers\Api\IncludesController;
-use App\Http\Controllers\Api\ExcludesController;
-use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\ItineraryController;
+use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\ReviewController;
-use App\Http\Controllers\Api\EsewaController;
-
+use App\Http\Controllers\Api\UserController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,19 +28,12 @@ Route::get('/packages/{package}', [PackageController::class, 'show']);
 
 Route::get('/show-reviews', [ReviewController::class, 'showReviews']);
 
-
-//esewa payment routes
+// esewa payment routes
 Route::get('/esewa/success', [EsewaController::class, 'success']);
 Route::get('/esewa/failure', [EsewaController::class, 'failure']);
 
-
-//search Routes
+// search Routes
 Route::get('/search-packages', [PackageController::class, 'search']);
-
-
-
-
-
 
 /*
 | Authenticated Routes
@@ -67,16 +59,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/gallery/{package}', [GalleryController::class, 'show']);
     Route::get('/includes/{package}', [IncludesController::class, 'show']);
     Route::get('/excludes/{package}', [ExcludesController::class, 'show']);
+    Route::get('/trek-highlights/{package}', [PackageController::class, 'showTrekHighlights']);
     Route::get('/view-users', [UserController::class, 'index']);
 
-    //Review endpoints
+    // Review endpoints
     Route::post('/reviews', [ReviewController::class, 'storeReview']);
     Route::get('/view-reviews', [ReviewController::class, 'index']);
 
-    //eswa initiate payment
+    // eswa initiate payment
     Route::post('/esewa/initiate', [EsewaController::class, 'initiatePayment']);
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -93,32 +85,36 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::delete('/packages/{package}', [PackageController::class, 'destroy']);
     Route::put('/packages/{package}/toggle-status', [PackageController::class, 'toggleStatus']);
 
-    //itinerary management
+    // itinerary management
     Route::post('/itinerary/{package}', [ItineraryController::class, 'store']);
     Route::put('/itinerary/{package}', [ItineraryController::class, 'update']);
     Route::delete('/itinerary/{package}', [ItineraryController::class, 'destroy']);
 
-    //Gallery Management
+    // Gallery Management
     Route::post('/gallery/{package}', [GalleryController::class, 'add']);
     Route::put('/gallery/{package}', [GalleryController::class, 'update']);
     Route::delete('/gallery/{package}', [GalleryController::class, 'delete']);
 
-    //Includes Management
+    // Includes Management
     Route::post('/includes/{package}', [IncludesController::class, 'store']);
     Route::put('/includes/{package}', [IncludesController::class, 'update']);
     Route::delete('/includes/{package}', [IncludesController::class, 'destroy']);
 
-    //Excludes Management
+    // Excludes Management
     Route::post('/excludes/{package}', [ExcludesController::class, 'store']);
     Route::put('/excludes/{package}', [ExcludesController::class, 'update']);
     Route::delete('/excludes/{package}', [ExcludesController::class, 'destroy']);
 
-    //user management
+    // user management
     Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus']);
     Route::patch('/bookings/{booking}/update-status', [BookingController::class, 'updateStatus']);
 
-    //Review Management
-    Route::patch('/reviews/{review}/toggle-status',[ReviewController::class, 'togglestatus']);
+    // Review Management
+    Route::patch('/reviews/{review}/toggle-status', [ReviewController::class, 'togglestatus']);
 
+    // Trek Highlights Management
+    Route::post('/trek-highlights/{package}', [PackageController::class, 'storeTrekHighlight']);
+    Route::put('/trek-highlights/{package}', [PackageController::class, 'updateTrekHighlight']);
+    Route::delete('/trek-highlights/{package}', [PackageController::class, 'deleteTrekHighlight']);
 
 });

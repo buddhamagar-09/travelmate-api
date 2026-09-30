@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Review;
 
 class Package extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'title',
         'slug',
@@ -40,6 +42,7 @@ class Package extends Model
     {
         return $this->hasMany(Includes::class);
     }
+
     // A package has many excludes
     public function excludes()
     {
@@ -55,8 +58,9 @@ class Package extends Model
     {
         return $this->hasMany(Review::class);
     }
-}
 
-// it is used to define the Package model in a Laravel application. The model represents the "packages" table in the database 
-// and defines the fillable attributes that can be mass-assigned. It also establishes relationships with the Itinerary and Gallery models,
-// indicating that a package can have many itineraries and galleries associated with it.
+    public function trekHighlights()
+    {
+        return $this->hasMany(Trekhighlight::class);
+    }
+}
