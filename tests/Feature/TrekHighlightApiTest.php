@@ -1,17 +1,21 @@
 <?php
 
 use App\Models\Package;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->package = Package::factory()->create();
+    $this->user = User::factory()->create(['usertype' => 'admin']);
+    Sanctum::actingAs($this->user);
 });
 
 it('can store trek highlights for a package', function () {
     $response = $this->postJson("/api/trek-highlights/{$this->package->id}", [
-        'highlight' => ['Beautiful scenery', 'Challenging trails', 'Wildlife spotting'],
+        'highlights' => ['Beautiful scenery', 'Challenging trails', 'Wildlife spotting'],
     ]);
 
     $response->assertStatus(201)
@@ -27,18 +31,18 @@ it('can store trek highlights for a package', function () {
 
 it('validates highlight is an array when storing', function () {
     $response = $this->postJson("/api/trek-highlights/{$this->package->id}", [
-        'highlight' => 'not-an-array',
+        'highlights' => 'not-an-array',
     ]);
 
     $response->assertStatus(422)
-        ->assertJsonValidationErrors(['highlight']);
+        ->assertJsonValidationErrors(['highlights']);
 });
 
 it('can update trek highlights for a package', function () {
     $this->package->trekHighlights()->create(['highlight' => 'Old highlight']);
 
     $response = $this->putJson("/api/trek-highlights/{$this->package->id}", [
-        'highlight' => ['New highlight 1', 'New highlight 2'],
+        'highlights' => ['New highlight 1', 'New highlight 2'],
     ]);
 
     $response->assertStatus(200)
