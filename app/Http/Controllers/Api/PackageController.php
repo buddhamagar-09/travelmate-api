@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class PackageController extends Controller
 {
     // GET /api/packages
     public function index()
     {
-        return Package::with(['galleries', 'itineraries', 'includes', 'excludes'])->where('status', 'active')
+        return Package::with(['galleries', 'itineraries', 'includes', 'excludes', 'trekHighlights'])->where('status', 'active')
             ->latest()
             ->get();
         // it returns all packages with their related galleries, itineraries, includes, and excludes.
@@ -26,15 +27,15 @@ class PackageController extends Controller
             return response()->json(['message' => 'Package not found'], 404);
         }
 
-        return $package->load(['galleries', 'itineraries', 'includes', 'excludes']);
+        return $package->load(['galleries', 'itineraries', 'includes', 'excludes', 'trekHighlights']);
         // it returns the package with its related galleries, itineraries, includes, and excludes.
     }
 
     // POST /api/packages
     public function store(Request $request)
     {
-        // it validates the incoming request data for creating a new package. 
-        // The validation rules ensure that all required fields are present and meet specific criteria, such as data type and maximum length. 
+        // it validates the incoming request data for creating a new package.
+        // The validation rules ensure that all required fields are present and meet specific criteria, such as data type and maximum length.
         // If the validation fails, Laravel will automatically return a response with the validation errors.
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -75,7 +76,7 @@ class PackageController extends Controller
 
         return response()->json([
             'message' => 'Package created successfully',
-            'package' => $package
+            'package' => $package,
         ], 201);
     }
 
@@ -115,7 +116,7 @@ class PackageController extends Controller
         return response()->json([
             'message' => 'Package updated successfully',
             'package' => $package,
-            'package_id' => $package->id
+            'package_id' => $package->id,
         ], 200);
     }
 
@@ -130,7 +131,7 @@ class PackageController extends Controller
         $package->delete();
 
         return response()->json([
-            'message' => 'Package deleted successfully'
+            'message' => 'Package deleted successfully',
         ]);
     }
 
@@ -142,29 +143,28 @@ class PackageController extends Controller
 
         return response()->json([
             'message' => 'Package status updated successfully',
-            'package' => $package
+            'package' => $package,
         ]);
     }
 
     public function adminIndex()
     {
-          return Package::with(['galleries', 'itineraries', 'includes', 'excludes'])
+        return Package::with(['galleries', 'itineraries', 'includes', 'excludes', 'trekHighlights'])
             ->latest()
             ->get();
     }
 
+    public function search(Request $request)
+    {
+        $query = trim($request->input('query'));
 
-  public function search(Request $request)
-{
-    $query = trim($request->input('query'));
+        if (!$query) {
+            return response()->json([
+                'message' => 'Query parameter is required',
+            ], 400);
+        }
 
-    if (!$query) {
-        return response()->json([
-            'message' => 'Query parameter is required'
-        ], 400);
-    }
-
-    $package = Package::select(
+        $package = Package::select(
             'id',
             'title',
             'slug',
@@ -179,16 +179,75 @@ class PackageController extends Controller
             'long_description',
             'featured_image'
         )
-        ->where('status', 'active')
-        ->where(function ($q) use ($query) {
-            $q->where('title', 'LIKE', "%{$query}%")
-              ->orWhere('slug', 'LIKE', "%{$query}%")
-              ->orWhere('location', 'LIKE', "%{$query}%")
-              ->orWhere('short_description', 'LIKE', "%{$query}%")
-              ->orWhere('long_description', 'LIKE', "%{$query}%");
-        })
-        ->get();
+            ->where('status', 'active')
+            ->where(function ($q) use ($query) {
+                $q->where('title', 'LIKE', "%{$query}%")
+                    ->orWhere('slug', 'LIKE', "%{$query}%")
+                    ->orWhere('location', 'LIKE', "%{$query}%")
+                    ->orWhere('short_description', 'LIKE', "%{$query}%")
+                    ->orWhere('long_description', 'LIKE', "%{$query}%");
+            })
+            ->get();
 
-    return response()->json($package);
-}
+        return response()->json($package);
+    }
+
+    public function storeTrekHighlight(Request $request, Package $package)
+    {
+        $validated = $request->validate([
+            'highlights' => 'required|array',
+            'highlights.*' => 'string|max:255',
+        ]);
+
+        foreach ($validated['highlights'] as $item) {
+            $package->trekHighlights()->create([
+                'highlight' => $item,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Trek Highlight saved successfully.',
+        ], 201);
+    }
+
+    public function showTrekHighlights(Package $package)
+    {
+        return response()->json([
+            'highlights' => $package->trekHighlights()
+                ->orderBy('id')
+                ->get()
+        ]);
+    }
+
+    public function updateTrekHighlight(Request $request, Package $package)
+    {
+        $validated = $request->validate([
+            'highlights' => 'required|array|min:1',
+            'highlights.*' => 'required|string|max:255',
+        ]);
+
+        DB::transaction(function () use ($package, $validated) {
+            $package->trekHighlights()->delete();
+
+            foreach ($validated['highlights'] as $item) {
+                $package->trekHighlights()->create([
+                    'highlight' => $item,
+                ]);
+            }
+        });
+
+        return response()->json([
+            'message' => 'Trek Highlight updated successfully.',
+        ], 200);
+    }
+
+    public function deleteTrekHighlight(Package $package)
+    {
+        $package->trekHighlights()->delete();
+
+        return response()->json([
+            'message' => 'Trek Highlight deleted successfully.',
+        ], 200);
+    }
+
 }
