@@ -12,9 +12,12 @@ class Package extends Model
     protected $fillable = [
         'title',
         'slug',
+        'category',
+        'destination_id',
         'short_description',
         'long_description',
         'price',
+        'status',
         'duration',
         'difficulty',
         'max_altitude',
@@ -23,6 +26,9 @@ class Package extends Model
         'location',
         'featured_image',
         'is_featured',
+        'tour_type',
+        'vehicle_type',
+        'park_name',
     ];
 
     // A package has many itinerary days

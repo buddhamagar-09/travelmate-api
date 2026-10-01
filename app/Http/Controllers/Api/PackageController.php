@@ -34,44 +34,61 @@ class PackageController extends Controller
     // POST /api/packages
     public function store(Request $request)
     {
-        // it validates the incoming request data for creating a new package.
-        // The validation rules ensure that all required fields are present and meet specific criteria, such as data type and maximum length.
-        // If the validation fails, Laravel will automatically return a response with the validation errors.
         $validated = $request->validate([
+            // ---- Shared (all categories) ----
             'title' => 'required|string|max:255',
             'slug' => 'required|string|unique:packages,slug',
+            'category' => 'required|in:trekking,tour,wildlife',
             'location' => 'required|string|max:255',
             'duration' => 'required|string|max:100',
             'price' => 'required|numeric',
-            'group_size' => 'required|string|max:100',
-            'max_altitude' => 'nullable|string|max:100',
-            'difficulty' => 'required|string|max:100',
-            'best_season' => 'required|string|max:255',
             'short_description' => 'required|string',
             'long_description' => 'required|string',
             'featured_image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
             'is_featured' => 'sometimes|boolean',
-        ]);
+            'destination_id' => 'nullable|integer',
 
+            // ---- Optional for all ----
+            'group_size' => 'nullable|string|max:100',
+            'best_season' => 'nullable|string|max:255',
+
+            // ---- Trekking-only ----
+            'difficulty' => 'required_if:category,trekking|nullable|string|max:100',
+            'max_altitude' => 'required_if:category,trekking|nullable|string|max:100',
+
+            // ---- Tour-only ----
+            'tour_type' => 'required_if:category,tour|nullable|string|max:100',
+            'vehicle_type' => 'required_if:category,tour|nullable|string|max:100',
+
+            // ---- Wildlife-only ----
+            'park_name' => 'required_if:category,wildlife|nullable|string|max:255',
+            // vehicle_type is optional for wildlife (allowed but not required)
+        ]);
         // Upload image
-        $imagePath = $request->file('featured_image')
-            ->store('packages', 'public');
+        $imagePath = $request->file('featured_image')->store('packages', 'public');
 
         // Create package
         $package = Package::create([
             'title' => $validated['title'],
             'slug' => $validated['slug'],
+            'category' => $validated['category'],
+            'destination_id' => $validated['destination_id'] ?? null,
             'location' => $validated['location'],
             'duration' => $validated['duration'],
-            'max_altitude' => $validated['max_altitude'] ?? null,
             'price' => $validated['price'],
-            'group_size' => $validated['group_size'],
-            'difficulty' => $validated['difficulty'],
-            'best_season' => $validated['best_season'],
+            'group_size' => $validated['group_size'] ?? null,
+            'best_season' => $validated['best_season'] ?? null,
             'short_description' => $validated['short_description'],
             'long_description' => $validated['long_description'],
             'featured_image' => $imagePath,
             'is_featured' => $validated['is_featured'] ?? false,
+
+            // Category-specific (nullable — safe for all)
+            'difficulty' => $validated['difficulty'] ?? null,
+            'max_altitude' => $validated['max_altitude'] ?? null,
+            'tour_type' => $validated['tour_type'] ?? null,
+            'park_name' => $validated['park_name'] ?? null,
+            'vehicle_type' => $validated['vehicle_type'] ?? null,
         ]);
 
         return response()->json([
@@ -83,26 +100,38 @@ class PackageController extends Controller
     // PUT /api/packages/{id}
     public function update(Request $request, Package $package)
     {
-        // Validate the incoming request data for updating an existing package.
         $validated = $request->validate([
+            // ---- Shared (all categories) ----
             'title' => 'sometimes|required|string|max:255',
             'slug' => 'sometimes|required|string|unique:packages,slug,' . $package->id,
+            'category' => 'sometimes|required|in:trekking,tour,wildlife',
+            'destination_id' => 'sometimes|nullable|integer',
             'location' => 'sometimes|required|string|max:255',
             'duration' => 'sometimes|required|string|max:100',
             'price' => 'sometimes|required|numeric',
-            'group_size' => 'sometimes|required|string|max:100',
-            'difficulty' => 'sometimes|required|string|max:100',
-            'max_altitude' => 'sometimes|nullable|string|max:100',
-            'best_season' => 'sometimes|required|string|max:255',
             'short_description' => 'sometimes|required|string',
             'long_description' => 'sometimes|required|string',
             'is_featured' => 'sometimes|required|boolean',
             'featured_image' => 'sometimes|image|mimes:jpg,jpeg,png,webp|max:2048',
+
+            // ---- Optional for all ----
+            'group_size' => 'sometimes|nullable|string|max:100',
+            'best_season' => 'sometimes|nullable|string|max:255',
+
+            // ---- Trekking-only ----
+            'difficulty' => 'required_if:category,trekking|nullable|string|max:100',
+            'max_altitude' => 'required_if:category,trekking|nullable|string|max:100',
+
+            // ---- Tour-only ----
+            'tour_type' => 'required_if:category,tour|nullable|string|max:100',
+            'vehicle_type' => 'required_if:category,tour|nullable|string|max:100',
+
+            // ---- Wildlife-only ----
+            'park_name' => 'required_if:category,wildlife|nullable|string|max:255',
         ]);
 
         // Update image if provided
         if ($request->hasFile('featured_image')) {
-            // Delete old image
             if ($package->featured_image) {
                 Storage::disk('public')->delete($package->featured_image);
             }
@@ -115,7 +144,7 @@ class PackageController extends Controller
 
         return response()->json([
             'message' => 'Package updated successfully',
-            'package' => $package,
+            'package' => $package->fresh(),
             'package_id' => $package->id,
         ], 200);
     }
