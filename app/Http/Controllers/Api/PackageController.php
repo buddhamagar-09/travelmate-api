@@ -193,22 +193,7 @@ class PackageController extends Controller
             ], 400);
         }
 
-        $package = Package::select(
-            'id',
-            'title',
-            'slug',
-            'location',
-            'duration',
-            'price',
-            'group_size',
-            'max_altitude',
-            'difficulty',
-            'best_season',
-            'short_description',
-            'long_description',
-            'featured_image'
-        )
-            ->where('status', 'active')
+        $packages = Package::where('status', 'active')
             ->where(function ($q) use ($query) {
                 $q->where('title', 'LIKE', "%{$query}%")
                     ->orWhere('slug', 'LIKE', "%{$query}%")
@@ -218,7 +203,7 @@ class PackageController extends Controller
             })
             ->get();
 
-        return response()->json($package);
+        return response()->json($packages);
     }
 
     public function storeTrekHighlight(Request $request, Package $package)
