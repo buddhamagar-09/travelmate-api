@@ -17,7 +17,7 @@ class BookingController extends Controller
         $bookings = Booking::with(['user', 'package'])
             ->latest()
             ->get();
-        
+
         return response()->json([
             'success' => true,
             'bookings' => $bookings,
@@ -68,28 +68,28 @@ class BookingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-public function updateStatus(Request $request, Booking $booking)
-{
-    $validated = $request->validate([
-        'status' => 'required|in:confirmed,cancelled',
-    ]);
+    public function updateStatus(Request $request, Booking $booking)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:confirmed,cancelled',
+        ]);
 
-    // Don't allow changing a booking once it's finalized
-    if ($booking->status !== 'pending') {
+        // Don't allow changing a booking once it's finalized
+        if ($booking->status !== 'pending') {
+            return response()->json([
+                'message' => 'This booking has already been processed.'
+            ], 400);
+        }
+
+        $booking->status = $validated['status'];
+        $booking->save();
+
         return response()->json([
-            'message' => 'This booking has already been processed.'
-        ], 400);
+            'success' => true,
+            'message' => 'Booking status updated successfully.',
+            'booking' => $booking,
+        ]);
     }
-
-    $booking->status = $validated['status'];
-    $booking->save();
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Booking status updated successfully.',
-        'booking' => $booking,
-    ]);
-}
 
     /**
      * Remove the specified resource from storage.
@@ -114,12 +114,12 @@ public function updateStatus(Request $request, Booking $booking)
 
     }
 
-    public function userBookingDetails(Request $request,string $id)
+    public function userBookingDetails(Request $request, string $id)
     {
-        $BookingDetails = Booking::with('user','package')
-        ->where('user_id', $request->user()->id)
-        ->where('id', $id)
-        ->firstorFail();
+        $BookingDetails = Booking::with('user', 'package')
+            ->where('user_id', $request->user()->id)
+            ->where('id', $id)
+            ->firstorFail();
 
         return response()->json([
             'success' => true,
@@ -130,7 +130,7 @@ public function updateStatus(Request $request, Booking $booking)
     /**
      * Cancel the specified booking.
      */
-    public function cancelBooking(Request $request,Booking $booking)
+    public function cancelBooking(Request $request, Booking $booking)
     {
 
         // Check if the booking belongs to the authenticated user
@@ -160,7 +160,7 @@ public function updateStatus(Request $request, Booking $booking)
             'message' => 'Booking cancelled successfully.',
             'booking' => $booking,
         ]);
-        
+
     }
 }
 
