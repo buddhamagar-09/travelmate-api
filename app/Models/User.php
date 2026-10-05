@@ -6,15 +6,16 @@ namespace App\Models;
 // hasapitokens is a trait provided by Laravel Sanctum that allows the User model to issue API tokens for authentication.
 // This trait provides methods for creating, managing, and validating API tokens associated with the user.
 // By using this trait, the User model can easily handle token-based authentication for API requests, enabling secure access to protected routes and resources in the application.
-use Laravel\Sanctum\HasApiTokens;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-   use HasApiTokens, HasFactory, Notifiable;
+    /** @use HasFactory<UserFactory> */
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -59,5 +60,10 @@ class User extends Authenticatable
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function plans()
+    {
+        return $this->hasMany(Plan::class);
     }
 }

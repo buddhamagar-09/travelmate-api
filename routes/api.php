@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\GalleryController;
 use App\Http\Controllers\Api\IncludesController;
 use App\Http\Controllers\Api\ItineraryController;
 use App\Http\Controllers\Api\PackageController;
+use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +69,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // eswa initiate payment
     Route::post('/esewa/initiate', [EsewaController::class, 'initiatePayment']);
+
+    // My Plans
+    Route::get('/plans', [PlanController::class, 'index']);
+    Route::get('/plans/{plan}', [PlanController::class, 'show']);
+    Route::post('/plans', [PlanController::class, 'store']);
+    Route::delete('/plans/{plan}', [PlanController::class, 'destroy']);
+
 });
 
 /*
